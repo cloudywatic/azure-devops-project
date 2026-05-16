@@ -4,6 +4,7 @@ import psycopg2
 
 app = Flask(__name__)
 
+
 def get_db_connection():
     # Azure will provide these environment variables automatically
     conn = psycopg2.connect(
@@ -26,6 +27,18 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
+
+db_initialized = False
+
+@app.before_request
+def setup_database():
+    global db_initialized
+    if not db_initialized:
+        try:
+            init_db()
+            db_initialized = True
+        except Exception as e:
+            print(f"Database init failed: {e}")
 
 @app.route('/')
 def index():
@@ -52,10 +65,21 @@ def add_task():
         conn.close()
     return redirect(url_for('index'))
 
+@app.route('/delete/<int:task_id>', methods=['POST'])
+def delete_task(task_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM tasks WHERE id = %s;', (task_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     try:
         init_db()
     except Exception as e:
         print(f"Could not init DB yet: {e}")
     # Azure App Service requires the app to bind to 0.0.0.0
-    app.run(host='0.0.0.0', port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
