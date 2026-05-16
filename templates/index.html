@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Azure DevOps App</title>
+</head>
+<body>
+    <h2>My Cloud-Native Task Tracker</h2>
+    <p><strong>DB Status:</strong> {{ db_status }}</p>
+    
+    <form action="/add" method="POST">
+        <input type="text" name="title" required>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <ul>
+        {% for task in tasks %}
+            <li>{{ task[1] }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
