@@ -8,3 +8,4 @@ __pycache__/
 *.tfstate.*
 
 tasks.db
+tasks.db-journal
